@@ -87,6 +87,15 @@ void sms4_set_encrypt_key(sms4_key_t *key, const unsigned char *user_key)
 	uint32_t *rk = key->rk;
 	uint32_t x0, x1, x2, x3, x4;
 
+    {
+        int i=0;
+        printf("sms4_set_encrypt_key key: ");
+        for (i=0; i<16; i++) {
+            printf("%2.2x", ((unsigned char*)user_key)[i]);
+        }
+        printf("\n");
+    }
+
 	x0 = GET32(user_key     ) ^ FK[0];
 	x1 = GET32(user_key  + 4) ^ FK[1];
 	x2 = GET32(user_key  + 8) ^ FK[2];

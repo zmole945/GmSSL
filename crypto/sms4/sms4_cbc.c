@@ -47,13 +47,41 @@
  * ====================================================================
  */
 
+#include <stdio.h>
+
 #include <openssl/sms4.h>
 #include <openssl/modes.h>
 
 void sms4_cbc_encrypt(const unsigned char *in, unsigned char *out,
 	size_t len, const sms4_key_t *key, unsigned char *iv, int enc)
 {
+    {
+        int i=0;
+        printf("sms4_cbc_encrypt iv : ");
+        for (i=0; i<16; i++) {
+            printf("%2.2x", ((unsigned char*)iv)[i]);
+        }
+        printf("\n");
+    }
+    {
+        int i=0;
+        printf("sms4_cbc_encrypt in : ");
+        for (i=0; i<len; i++) {
+            printf("%2.2x", ((unsigned char*)in)[i]);
+        }
+        printf("\n");
+    }
+
 	if (enc)
 		CRYPTO_cbc128_encrypt(in, out, len, key, iv, (block128_f)sms4_encrypt);
 	else	CRYPTO_cbc128_decrypt(in, out, len, key, iv, (block128_f)sms4_encrypt);
+
+    {
+        int i=0;
+        printf("sms4_cbc_encrypt out: ");
+        for (i=0; i<len; i++) {
+            printf("%2.2x", ((unsigned char*)out)[i]);
+        }
+        printf("\n");
+    }
 }

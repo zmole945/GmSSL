@@ -21,6 +21,15 @@ int HMAC_Init_ex(HMAC_CTX *ctx, const void *key, int len,
     int i, j, reset = 0;
     unsigned char pad[HMAC_MAX_MD_CBLOCK];
 
+    {
+        int i=0;
+        printf("HMAC_Init_ex: ");
+        for (i=0; i<len; i++) {
+            printf("%2.2x", ((unsigned char*)key)[i]);
+        }
+        printf("\n");
+    }
+
     /* If we are changing MD then we must have a key */
     if (md != NULL && md != ctx->md && (key == NULL || len < 0))
         return 0;
@@ -90,6 +99,15 @@ int HMAC_Init(HMAC_CTX *ctx, const void *key, int len, const EVP_MD *md)
 
 int HMAC_Update(HMAC_CTX *ctx, const unsigned char *data, size_t len)
 {
+    {
+        int i=0;
+        printf("HMAC_Update: ");
+        for (i=0; i<len; i++) {
+            printf("%2.2x", ((unsigned char*)data)[i]);
+        }
+        printf("\n");
+    } 
+
     if (!ctx->md)
         return 0;
     return EVP_DigestUpdate(ctx->md_ctx, data, len);
@@ -111,6 +129,16 @@ int HMAC_Final(HMAC_CTX *ctx, unsigned char *md, unsigned int *len)
         goto err;
     if (!EVP_DigestFinal_ex(ctx->md_ctx, md, len))
         goto err;
+
+    {
+        int i=0;
+        printf("HMAC_Final: ");
+        for (i=0; i<(*len); i++) {
+            printf("%2.2x", ((unsigned char*)md)[i]);
+        }
+        printf("\n");
+    } 
+
     return 1;
  err:
     return 0;
