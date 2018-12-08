@@ -74,6 +74,36 @@ OPTIONS dgst_options[] = {
     {NULL}
 };
 
+static int set_hex(const char *in, unsigned char *out, int size)
+{
+    int i, n;
+    unsigned char j;
+
+    i = size * 2;
+    n = strlen(in);
+    if (n > i) {
+        BIO_printf(bio_err, "hex string is too long, ignoring excess\n");
+        n = i; /* ignore exceeding part */
+    } else if (n < i) {
+        BIO_printf(bio_err, "hex string is too short, padding with zero bytes to length\n");
+    }
+
+    memset(out, 0, size);
+    for (i = 0; i < n; i++) {
+        j = (unsigned char)*in++;
+        if (!isxdigit(j)) {
+            BIO_printf(bio_err, "non-hex digit\n");
+            return 0;
+        }
+        j = (unsigned char)OPENSSL_hexchar2int(j);
+        if (i & 1)
+            out[i / 2] |= j;
+        else
+            out[i / 2] = (j << 4);
+    }
+    return 1;
+}
+
 int dgst_main(int argc, char **argv)
 {
     BIO *in = NULL, *inp, *bmd = NULL, *out = NULL;
@@ -291,8 +321,20 @@ int dgst_main(int argc, char **argv)
     }
 
     if (hmac_key) {
+#if 1
+        unsigned char key[128];
+        if (!set_hex(hmac_key, key, strlen(hmac_key)/2)) {
+            BIO_printf(bio_err, "invalid hex key value\n");
+            goto end;
+        }
+        /* wiping secret data as we no longer need it */
+        sigkey = EVP_PKEY_new_mac_key(EVP_PKEY_HMAC, impl,
+                                              (unsigned char *)key, strlen(hmac_key)/2);
+        OPENSSL_cleanse(hmac_key, strlen(hmac_key));
+#else
         sigkey = EVP_PKEY_new_mac_key(EVP_PKEY_HMAC, impl,
                                       (unsigned char *)hmac_key, -1);
+#endif
         if (!sigkey)
             goto end;
     }
